@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap, fmt::Debug, hash::Hash, panic::{catch_unwind, AssertUnwindSafe}
+    collections::HashMap, fmt::Debug, hash::Hash, panic::{catch_unwind, AssertUnwindSafe}, thread
 };
 use rand::random;
 
@@ -64,7 +64,7 @@ where T: Ord + Clone + Debug + Eq + Hash + Default,
             .or_default();
         names.push(name);
     });
-    if table.len() <= 1 { return }
+    if table.len() == 1 { return }
     for (arr, names) in table.into_iter() {
         println!("{names:#?}: {arr:?}");
     }
@@ -73,17 +73,26 @@ where T: Ord + Clone + Debug + Eq + Hash + Default,
 
 #[test]
 fn test_random_cases() {
-    let mut buf = vec![];
+    let threads = 8;
+    let mut bufs = vec![vec![]; threads];
     let mut bound_lens = [0, 1, 2, 3].into_iter();
     for _ in 0..200 {
         let len = bound_lens.next().unwrap_or_else(|| {
             rand::random::<usize>() % TEST_LEN
         });
-        buf.resize(len, 0);
-        for ele in &mut buf {
-            *ele = random::<usize>() % TEST_LEN >> 1;
+        for buf in &mut bufs {
+            buf.resize(len, 0);
+            for ele in buf {
+                *ele = random::<usize>() % TEST_LEN >> 1;
+            }
         }
-        shuffle(&mut buf);
-        run_sorts(&buf);
+        thread::scope(|scope| {
+            for buf in &mut bufs {
+                scope.spawn(move || {
+                    shuffle(buf);
+                    run_sorts(buf);
+                });
+            }
+        });
     }
 }
