@@ -1,4 +1,6 @@
-use std::cmp::Ordering;
+//! utils module
+
+use std::{cmp::Ordering, mem};
 
 pub use crate::{cmp, i};
 
@@ -103,3 +105,38 @@ pub trait IterMinMax: Iterator<Item: Clone> + Sized {
     }
 }
 impl<T: Iterator<Item: Clone> + Sized> IterMinMax for T { }
+
+pub trait IterBufEach: Iterator + Sized {
+    /// Buffer each
+    ///
+    /// # Examples
+    /// ```
+    /// # use sorts_rs::utils::IterBufEach;
+    /// let mut i = 0;
+    /// (0..6).buf_each(|ele, buf| {
+    ///     if i == 0 { assert_eq!((ele, buf), (0, &mut [1, 2, 3, 4])); }
+    ///     else if i == 1 { assert_eq!((ele, buf), (1, &mut [2, 3, 4, 5])); }
+    ///     else { panic!() }
+    ///     i += 1;
+    /// });
+    /// ```
+    fn buf_each<const N: usize>(
+        mut self,
+        mut f: impl FnMut(Self::Item, &mut [Self::Item; N]),
+    ) {
+        let mut buf = [const { None }; N];
+        self.by_ref().take(N).enumerate()
+            .for_each(|(i, ele)|
+        {
+            buf[i] = Some(ele);
+        });
+        if buf.iter().any(Option::is_none) { return }
+        let mut buf = buf.map(Option::unwrap);
+        self.for_each(|ele| {
+            let first = mem::replace(&mut buf[0], ele);
+            buf.rotate_left(1);
+            f(first, &mut buf);
+        });
+    }
+}
+impl<I: Iterator + Sized> IterBufEach for I { }

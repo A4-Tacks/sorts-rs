@@ -97,6 +97,7 @@ where F: FnMut(&T, &T) -> bool,
     merge(arr, mid, buf, lt)
 }
 
+/// Merge Sort, like [`merge_sort`], using extern buffer
 pub fn merge_sort_with_buf<T, F>(
     arr: &mut [T],
     buf: &mut Vec<T>,
@@ -110,6 +111,13 @@ where F: FnMut(&T, &T) -> bool,
 
 /// Merge sort
 ///
+/// > 归并排序, 相当均衡通用的一种排序算法, 最好最坏复杂度均为`O(n*log(n))`.
+/// > 并且不像堆排序缓存不友好, 归并排序的访问基本上非常连续, 缓存较为容易命中.
+/// > 这个排序还是稳定的, 也就是排序前后相等元素相对顺序不变
+/// > 其唯一缺点也就是其归并算法需要开辟额外空间,
+/// > 在双向归并算法的优化下这个空间最多需要`ceil(n/2)`.
+///
+/// **is stable sort**
 /// # Example
 /// ```
 /// # use sorts_rs::normal::merge_sort;

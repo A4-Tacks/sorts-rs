@@ -1,8 +1,11 @@
 use std::mem::swap;
 
-use crate::cmp;
+use crate::{cmp, utils::IterBufEach};
 
 /// Bubble sort
+///
+/// > 鸡尾酒排序, 也称双向冒泡排序, 其流程对于冒泡排序来说多了一趟往回走
+/// > 可以同时确定一个最小值和最大值
 ///
 /// **is stable sort**
 /// # Example
@@ -13,28 +16,29 @@ use crate::cmp;
 /// cocktail_sort(&mut arr, lt);
 /// assert_eq!(arr, [0, 1, 2, 3, 4, 5, 6, 9]);
 /// ```
-pub fn cocktail_sort<T, F>(arr: &mut [T], mut lt: F)
+pub fn cocktail_sort<T, F>(mut arr: &mut [T], mut lt: F)
 where F: FnMut(&T, &T) -> bool,
 {
     let mut edited = true;
 
-    while edited {
+    while edited && arr.len() > 1 {
         edited = false;
 
-        arr.iter_mut().reduce(|a, b| {
+        arr.iter_mut().buf_each(|a, [b]| {
             if cmp!(lt(a,>b)) {
                 swap(a, b);
                 edited = true;
             }
-            b
         });
 
-        arr.iter_mut().rev().reduce(|a, b| {
+        arr.iter_mut().rev().buf_each(|a, [b]| {
             if cmp!(lt(a,<b)) {
                 swap(a, b);
                 edited = true;
             }
-            b
         });
+
+        let range = 1..arr.len()-1;
+        arr = &mut arr[range];
     }
 }

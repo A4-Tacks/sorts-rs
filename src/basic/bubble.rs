@@ -1,8 +1,12 @@
 use std::mem::swap;
 
-use crate::cmp;
+use crate::{cmp, utils::IterBufEach};
 
 /// Bubble sort
+///
+/// > 冒泡排序, 几乎是最简单的排序
+/// > 最简单的实现就是两两查看, 顺序颠倒则交换
+/// > 这样可以在每一轮将一个最大值送到末尾
 ///
 /// **is stable sort**
 /// # Example
@@ -22,14 +26,11 @@ where F: FnMut(&T, &T) -> bool,
     while edited {
         edited = false;
 
-        arr.iter_mut()
-            .reduce(|a, b|
-        {
+        arr.iter_mut().buf_each(|a, [b]| {
             if cmp!(lt(a,>b)) {
                 swap(a, b);
                 edited = true;
             }
-            b
         });
         (_, arr) = arr.split_last_mut().unwrap();
     }

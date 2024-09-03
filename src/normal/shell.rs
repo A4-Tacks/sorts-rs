@@ -19,6 +19,9 @@ where F: FnMut(&T, &T) -> bool,
 
 /// Shell sort, is grouped insert sort
 ///
+/// > 标准的 ShellSort, 最坏时间复杂度为`O(n^2)`,
+/// > 但在中等规模的数据下工作还是很不错的
+///
 /// # Example
 /// ```
 /// # use sorts_rs::normal::shell_sort;
@@ -58,6 +61,8 @@ pub fn sedgewick_expr(i: usize) -> usize {
 }
 
 /// Shell sort (use Sedgewick)
+///
+/// > 步长使用 Sedgewick 增量序列的 ShellSort, 平均复杂度`O(n^1.3)`
 ///
 /// Use step expr:
 /// - `i % 2 == 0`: `9 * (4^u - 2^u) + 1`

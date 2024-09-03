@@ -2,6 +2,8 @@ use crate::cmp;
 
 /// Selection sort
 ///
+/// > 双重选择排序, 相对普通选择排序, 它会同时选择最大值和最小值
+///
 /// **is stable sort**
 /// # Example
 /// ```
@@ -11,26 +13,26 @@ use crate::cmp;
 /// select_doubled_sort(&mut arr, lt);
 /// assert_eq!(arr, [0, 1, 2, 3, 4, 5, 6, 9]);
 /// ```
-pub fn select_doubled_sort<T, F>(arr: &mut [T], mut lt: F)
+pub fn select_doubled_sort<T, F>(mut arr: &mut [T], mut lt: F)
 where F: FnMut(&T, &T) -> bool,
 {
-    if arr.len() < 2 { return }
-    let (mut l, mut r) = (0, arr.len() - 1);
-    while l < r {
-        let [mut min, mut max] = [&arr[l], &arr[r]];
-        let [mut mini, mut maxi] = [l, r];
-        (l..=r).for_each(|i| {
-            if cmp!(lt(arr[i],< min)) {
-                (mini, min) = (i, &arr[i]);
+    while arr.len() > 1 {
+        let tail = arr.len()-1;
+        let [mut mini, mut maxi] = [0, tail];
+        let [mut min, mut max] = [&arr[mini], &arr[maxi]];
+
+        for (i, ele) in arr.iter().enumerate() {
+            if cmp!(lt(ele,< min)) {
+                (mini, min) = (i, ele);
             }
-            if cmp!(lt(arr[i],> max)) {
-                (maxi, max) = (i, &arr[i]);
+            if cmp!(lt(ele,> max)) {
+                (maxi, max) = (i, ele);
             }
-        });
-        if maxi == l { maxi = mini }
-        arr.swap(l, mini);
-        arr.swap(r, maxi);
-        l += 1;
-        r -= 1;
+        }
+
+        if maxi == 0 { maxi = mini }
+        arr.swap(0, mini);
+        arr.swap(tail, maxi);
+        arr = &mut arr[1..tail];
     }
 }

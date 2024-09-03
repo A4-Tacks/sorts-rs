@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use crate::utils::IterMinMax;
 
-/// Counting sort
+/// Counting sort, like [`count_sort`], but use extern buffer
 ///
 /// **is new value sort**
 ///
@@ -47,6 +47,10 @@ where T: TryInto<usize> + TryFrom<usize> + Copy + Debug,
 }
 
 /// Counting sort
+///
+/// > 计数排序, 如其名字, 将每一种值计数,
+/// > 然后再通过字典顺序按计数数量生成值.
+/// > 这个算法的复杂度是`O(n)`, 但是需要`max-min+1`的辅助空间
 ///
 /// **is new value sort**
 ///
