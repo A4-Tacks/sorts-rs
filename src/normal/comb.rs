@@ -21,8 +21,8 @@ where F: FnMut(&T, &T) -> bool,
 
 /// Comb sort, is grouped bubble sort
 ///
-/// > 来自冒泡排序的分组优化版本, 类似 Shell Sort,
-/// > 复杂度似乎也是`O(n*log(n))`, 但是快不到哪去就是了
+/// > 梳排序, 来自冒泡排序的分组优化版本, 类似 Shell Sort,
+/// > 最坏复杂度`O(n^2)`, 平均情况`O(n^2 / 2^p)`, p为增量次数
 ///
 /// **is stable sort**
 /// # Example
