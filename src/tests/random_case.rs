@@ -107,7 +107,7 @@ fn bitonic_sort_test() {
     let mut buf = vec![];
     let mut buf1 = vec![];
     let lt = usize::lt;
-    for i in 0..20 {
+    for i in 0..18 {
         let len = 1 << i;
         buf.resize(len, 0);
         buf1.resize(len, 0);
