@@ -1,7 +1,12 @@
-use std::{
-    collections::HashMap, fmt::Debug, hash::Hash, panic::{catch_unwind, AssertUnwindSafe}, thread
-};
 use rand::random;
+use std::{
+    collections::HashMap,
+    fmt::Debug,
+    hash::Hash,
+    iter::zip,
+    panic::{catch_unwind, AssertUnwindSafe},
+    thread,
+};
 
 use crate::*;
 
@@ -94,5 +99,26 @@ fn test_random_cases() {
                 });
             }
         });
+    }
+}
+
+#[test]
+fn bitonic_sort_test() {
+    let mut buf = vec![];
+    let mut buf1 = vec![];
+    let lt = usize::lt;
+    for i in 0..20 {
+        let len = 1 << i;
+        buf.resize(len, 0);
+        buf1.resize(len, 0);
+        for (a, b) in zip(&mut buf, &mut buf1) {
+            let num = random::<usize>() % len >> 1;
+            *a = num;
+            *b = num;
+        }
+
+        other::bitonic_sort(&mut buf, lt);
+        buf1.sort();
+        assert_eq!(buf, buf1);
     }
 }

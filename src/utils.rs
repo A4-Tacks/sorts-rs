@@ -44,6 +44,19 @@ macro_rules! cmp {
         |a, b| !$lt(a, b)
     };
 
+    ($lt:ident(<)) => {
+        |a, b| $lt(a, b)
+    };
+    ($lt:ident(>)) => {
+        |a, b| $lt(b, a)
+    };
+    ($lt:ident(<=)) => {
+        |a, b| !$lt(b, a)
+    };
+    ($lt:ident(>=)) => {
+        |a, b| !$lt(a, b)
+    };
+
     ($lt:ident($a:expr ,< $b:expr)) => {
         $lt(&$a, &$b)
     };
