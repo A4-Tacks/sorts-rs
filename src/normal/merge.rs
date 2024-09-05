@@ -1,8 +1,10 @@
-use std::{iter, mem::take};
+use std::{iter::{self, zip}, mem::take};
 
 use crate::{cmp, i};
 
 /// Merge sorted `arr[..len]` and `arr[len..]`
+///
+/// > 优化了辅助空间使用的双向归并算法, 最差空间复杂度`O(n/2)`
 ///
 /// 涉及到元素的双重存在, 需要使用unsafe且通过guard保证其UnwindSafe,
 /// 这过于复杂, 虽然有能力实现但并不好阅读, 所以将约束Default并使用take
@@ -82,6 +84,67 @@ where F: FnMut(&T, &T) -> bool,
         for ele in i {
             arr[i!(--k)] = ele;
         }
+    }
+}
+
+/// 传统单向归并算法, 将开辟`O(n)`的额外空间
+///
+/// > 类似 [`merge`], 但是没有辅助空间优化
+///
+/// # Examples
+/// ```
+/// # use sorts_rs::normal::normal_merge;
+/// let mut buf = vec![];
+/// let mut arr = [5, 6, 7, 1, 2, 3, 4];
+/// normal_merge(&mut arr, 3, &mut buf, i32::lt);
+/// assert_eq!(arr, [1, 2, 3, 4, 5, 6, 7]);
+///
+/// let mut arr = [1, 5, 7, 2, 3, 4, 6];
+/// normal_merge(&mut arr, 3, &mut buf, i32::lt);
+/// assert_eq!(arr, [1, 2, 3, 4, 5, 6, 7]);
+///
+/// let mut arr = [1, 5, 7, 2, 3, 4, 6, 8];
+/// normal_merge(&mut arr, 3, &mut buf, i32::lt);
+/// assert_eq!(arr, [1, 2, 3, 4, 5, 6, 7, 8]);
+///
+/// let mut arr = [1, 5, 7, 8, 2, 3, 4, 6];
+/// normal_merge(&mut arr, 4, &mut buf, i32::lt);
+/// assert_eq!(arr, [1, 2, 3, 4, 5, 6, 7, 8]);
+///
+/// let mut arr = [1, 3, 5, 7, 8, 2, 4, 6];
+/// normal_merge(&mut arr, 5, &mut buf, i32::lt);
+/// assert_eq!(arr, [1, 2, 3, 4, 5, 6, 7, 8]);
+///
+/// let mut arr = [4, 5, 6, 7, 8, 1, 2, 3];
+/// normal_merge(&mut arr, 5, &mut buf, i32::lt);
+/// assert_eq!(arr, [1, 2, 3, 4, 5, 6, 7, 8]);
+/// ```
+pub fn normal_merge<T, F>(
+    arr: &mut [T],
+    len: usize,
+    buf: &mut Vec<T>,
+    mut lt: F,
+)
+where F: FnMut(&T, &T) -> bool,
+      T: Default,
+{
+    buf.clear();
+    let (lo, hi) = arr.split_at_mut(len);
+    let (mut lo, mut hi) = (
+        lo.iter_mut().map(take).peekable(),
+        hi.iter_mut().map(take).peekable(),
+    );
+    while let (Some(a), Some(b)) = (lo.peek(), hi.peek()) {
+        if cmp!(lt(a,<= b)) {
+            buf.push(lo.next().unwrap());
+        } else {
+            buf.push(hi.next().unwrap());
+        }
+    }
+    buf.extend(lo);
+    buf.extend(hi);
+    for (dst, src) in zip(arr, buf.drain(..)) {
+        *dst = src;
     }
 }
 
