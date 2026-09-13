@@ -48,16 +48,19 @@ impl<'a, T> BHeap<'a, T> {
 
     fn filter_down<F>(
         &mut self,
-        idx: usize,
+        mut idx: usize,
         mut lt: F,
     ) -> Result<(), Error>
     where F: FnMut(&T, &T) -> bool,
     {
-        let Some((maxi, max)) = self.max_leaf(idx, &mut lt) else { return Ok(()) };
-        let this = self.get(idx).ok_or(Error::IndexOutOfRange(idx))?;
-        if cmp!(lt(this,< max)) {
+        while let Some((maxi, max)) = self.max_leaf(idx, &mut lt) {
+            let this = self.get(idx).ok_or(Error::IndexOutOfRange(idx))?;
+
+            if cmp!(lt(this,>= max)) {
+                break
+            }
             self.swap(idx, maxi);
-            self.filter_down(maxi, lt)?;
+            idx = maxi;
         }
         Ok(())
     }
